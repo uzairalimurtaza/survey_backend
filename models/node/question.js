@@ -7,12 +7,16 @@ const questionSchema = new mongoose.Schema({
   option_id: {
     type: mongoose.Types.ObjectId,
   },
-  root_id: {
+  topic_id: {
     type: mongoose.Types.ObjectId,
   },
   createdAt: {
     type: Date,
     default: Date.now(),
+  },
+  status: {
+    type: String,
+    default: "Pending"
   },
 });
 
