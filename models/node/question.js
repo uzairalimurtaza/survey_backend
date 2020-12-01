@@ -14,6 +14,9 @@ const questionSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  type:{
+    type: String
+  },
   status: {
     type: String,
     default: "Pending"

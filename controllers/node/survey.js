@@ -116,10 +116,11 @@ exports.viewParentNode = asyncHandler(async (req, res, next) => {
 
 exports.createQuestion = asyncHandler(async (req, res, next) => {
   try {
-    let { question, topic_id } = req.body;
+    let { question, topic_id, type } = req.body;
     const question_ = await Question.create({
       question,
       topic_id,
+      type,
     });
     res.status(200).json({
       status: 200,
@@ -152,14 +153,27 @@ exports.createOption = asyncHandler(async (req, res, next) => {
 exports.createClick = asyncHandler(async (req, res, next) => {
   try {
     let { option_id, question_id } = req.body;
-    const click = await Clicks.create({
-      option_id,
-      question_id,
-      user_id: req.user.id,
-    });
+    console.log(req.body);
+    const question = await Question.findById({ _id: question_id });
+    console.log(question.type);
+    if (question.type == "Checkbox") {
+      for (let i = 0; i < option_id.length; i++) {
+        console.log(option_id[i]);
+        const click = await Clicks.create({
+          option_id: option_id[i],
+          question_id,
+          user_id: req.user.id,
+        });
+      }
+    } else {
+      const click = await Clicks.create({
+        option_id,
+        question_id,
+        user_id: req.user.id,
+      });
+    }
     res.status(200).json({
       status: 200,
-      click,
       message: "Click saved",
     });
   } catch (err) {
@@ -317,11 +331,20 @@ exports.getQuestionById = asyncHandler(async (req, res, next) => {
   try {
     const question = await Question.findById({ _id: req.params.id });
     let options = await Option.find({ question_id: question.id });
+    const clicks = await Clicks.find();
+    let questions = [];
+    for (let i = 0; i < options.length; i++) {
+      let cl = await clicks.filter((c) => c.option_id == options[i].id);
+      questions.push({
+        option: options[i],
+        clicks: cl.length,
+      });
+    }
     res.status(200).json({
       status: 200,
       question: {
-        question,
-        options: options,
+        question: question,
+        options: questions,
       },
     });
   } catch (err) {
@@ -371,6 +394,7 @@ exports.viewClicks = asyncHandler(async (req, res, next) => {
 exports.setNextQuestionsDefault = asyncHandler(async (req, res, next) => {
   try {
     let topic_id = req.params.id;
+    console.log(topic_id);
     if (topic_id == null || topic_id == undefined || topic_id == "") {
       res.status(200).json({
         status: 200,
