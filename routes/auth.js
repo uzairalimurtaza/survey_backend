@@ -12,7 +12,8 @@ const {
     updateEmail,
     updatePhoneNumber,
     updateAdvertiser,
-    updateAdminProfile
+    updateAdminProfile,
+    createUsersInBulk
 } = require("../controllers/auth");
 const { protect } = require("../middleware/auth");
 const multer = require("multer");
@@ -50,5 +51,6 @@ router.put("/auth/update/email", parse.any(), protect, updateEmail);
 router.put("/auth/update/phone", parse.any(), protect, updatePhoneNumber);
 router.put("/auth/update/pub/:id", parse.any(), protect, updateAdvertiser);
 router.put("/auth/update/admin/:id", parse.any(), protect, updateAdminProfile);
+router.post("/create/user/bulk", parse.any(), protect, createUsersInBulk);
 
 module.exports = router;

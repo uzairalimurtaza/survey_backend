@@ -9,9 +9,20 @@ const userSchema = mongoose.Schema({
   },
   lastname: {
     type: String,
-    required: [true, "please enter your lastname"],
   },
   arfirstname: {
+    type: String,
+  },
+  teritory: {
+    type: String,
+  },
+  area: {
+    type: String,
+  },
+  outletName: {
+    type: String,
+  },
+  region: {
     type: String,
   },
   arlastname: {
@@ -22,16 +33,9 @@ const userSchema = mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, "Please enter your email"],
-    unique: [true, "user already exists with this email"],
-    match: [
-      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      "please enter a valid email address",
-    ],
   },
   roll: {
     type: String,
-    enum: ["User", "Admin", "Publisher"],
     default: "User",
   },
   password: {
@@ -46,7 +50,9 @@ const userSchema = mongoose.Schema({
   },
   phone_number: {
     type: String,
-    unique: true,
+  },
+  mobile:{
+    type: String
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,

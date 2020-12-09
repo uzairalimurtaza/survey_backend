@@ -7,6 +7,15 @@ const clickSchema = new mongoose.Schema({
   option_id: {
     type: mongoose.Types.ObjectId,
   },
+  option: {
+    type: String,
+  },
+  question: {
+    type: String,
+  },
+  topic_id:{
+    type: mongoose.Types.ObjectId,
+  },
   question_id: {
     type: mongoose.Types.ObjectId,
   },

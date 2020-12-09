@@ -6,6 +6,8 @@ const Option = require("../../models/node/option");
 const Clicks = require("../../models/node/Clicks");
 const Survey = require("../../models/node/Survey");
 const User = require("../../models/users_model");
+const Allsurveys = require("../../models/node/Allsurveys");
+const LinkedTopics = require("../../models/node/Linkedtopics");
 
 exports.viewQuestionForAdmin = asyncHandler(async (req, res, next) => {
   try {
@@ -152,24 +154,37 @@ exports.createOption = asyncHandler(async (req, res, next) => {
 
 exports.createClick = asyncHandler(async (req, res, next) => {
   try {
-    let { option_id, question_id } = req.body;
-    console.log(req.body);
-    const question = await Question.findById({ _id: question_id });
-    console.log(question.type);
+    let {
+      option_id,
+      question_id,
+      option,
+      question,
+      user_id,
+      topic_id,
+    } = req.body;
+    // console.log(req.body);
+    const questionsss = await Question.findById({ _id: question_id });
+    // console.log(question.type);
     if (question.type == "Checkbox") {
       for (let i = 0; i < option_id.length; i++) {
-        console.log(option_id[i]);
+        // console.log(option_id[i]);
         const click = await Clicks.create({
           option_id: option_id[i],
+          option,
+          question,
           question_id,
-          user_id: req.user.id,
+          user_id: user_id,
+          topic_id,
         });
       }
     } else {
       const click = await Clicks.create({
         option_id,
+        option,
+        question,
         question_id,
-        user_id: req.user.id,
+        user_id: user_id,
+        topic_id,
       });
     }
     res.status(200).json({
@@ -253,7 +268,7 @@ exports.createSurvey = asyncHandler(async (req, res, next) => {
   try {
     let { survey } = req.body;
     const survey_ = await Survey.create({
-      user_id: req.user.id,
+      user_id: req.body.user_id,
       survey: survey,
     });
     res.status(200).json({
@@ -279,7 +294,7 @@ exports.viewSurvey = asyncHandler(async (req, res, next) => {
 
 exports.viewTopicWithQuestions = asyncHandler(async (req, res, next) => {
   try {
-    console.log(req.params);
+    // console.log(req.params);
     let topic_with_questions = [];
     const topic = await Parent.findById({ _id: req.params.id });
     const questions = await Question.find({ topic_id: req.params.id });
@@ -394,7 +409,7 @@ exports.viewClicks = asyncHandler(async (req, res, next) => {
 exports.setNextQuestionsDefault = asyncHandler(async (req, res, next) => {
   try {
     let topic_id = req.params.id;
-    console.log(topic_id);
+    // console.log(topic_id);
     if (topic_id == null || topic_id == undefined || topic_id == "") {
       res.status(200).json({
         status: 200,
@@ -438,6 +453,7 @@ exports.linkUserWithSurvey = asyncHandler(async (req, res, next) => {
   try {
     // const topic = await Parent.findById({ _id: req.body.topic_id });
     let { user_id, topic_id } = req.body;
+    console.log(req.body);
     if (
       user_id == null ||
       user_id == undefined ||
@@ -451,11 +467,10 @@ exports.linkUserWithSurvey = asyncHandler(async (req, res, next) => {
         message: "Please provide topic_id and user_id",
       });
     } else {
-      const user = await User.findByIdAndUpdate(
-        { _id: req.body.user_id },
-        { topic_id: topic_id },
-        { new: true, useFindAndModify: false }
-      );
+      const newLinkedTopic = await LinkedTopics.create({
+        user_id: user_id,
+        topic_id,
+      });
 
       res.status(200).json({
         status: 200,
@@ -495,14 +510,240 @@ exports.getsingleUser = asyncHandler(async (req, res, next) => {
   }
 });
 
-// exports.viewClickofParticularOption = asyncHandler(async (req, res, next) => {
-//   try {
-//     // const option = await Option.findById({ _id: req.params.id });
-//     const clicks = await Click.find({ option_id: req.params.id });
-//     if(clicks.length > 0){
+exports.viewUserSurveys = asyncHandler(async (req, res, next) => {
+  try {
+    const clicks = await Clicks.find({
+      user_id: req.body.user_id,
+      topic_id: req.body.topic_id,
+    });
+    res.status(200).json({
+      status: 200,
+      clicks,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
-//     }
-//   } catch (err) {
-//     next(err);
-//   }
-// });
+exports.viewUserSurveysAssigned = asyncHandler(async (req, res, next) => {
+  try {
+    const linkedTopics = await LinkedTopics.find({ user_id: req.params.id });
+    let topics = [];
+    if (linkedTopics.length > 0) {
+      for (let i = 0; i < linkedTopics.length; i++) {
+        var clicks_ = await Parent.findById({ _id: linkedTopics[i].topic_id });
+        topics.push(clicks_);
+      }
+    }
+    res.status(200).json({
+      status: 200,
+      topics,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+exports.createAgent = asyncHandler(async (req, res, next) => {
+  try {
+    const checkEmail = await User.find({
+      email: req.body.email,
+      roll: req.body.roll,
+    });
+    const checkPhone = await User.find({
+      phone_number: req.body.phone_number,
+      roll: req.body.roll,
+    });
+
+    if (checkPhone.length > 0) {
+      res.status(200).json({
+        status: 200,
+        message: "Phone Number already exists",
+      });
+    } else if (checkEmail.length > 0) {
+      res.status(200).json({
+        status: 200,
+        message: "Email already exists",
+      });
+    } else {
+      const user_1 = await User.create({
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        email: req.body.email,
+        password: req.body.password,
+        phone_number: req.body.phone_number,
+        roll: req.body.roll,
+      });
+      res.status(200).json({
+        status: 200,
+        message: "User created successfully",
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+exports.createUserByAdmin = asyncHandler(async (req, res, next) => {
+  try {
+    const checkEmail = await User.find({
+      email: req.body.email,
+      roll: req.body.roll,
+    });
+    const checkPhone = await User.find({
+      phone_number: req.body.phone_number,
+      roll: req.body.roll,
+    });
+
+    if (checkPhone.length > 0) {
+      res.status(200).json({
+        status: 200,
+        message: "Phone Number already exists",
+      });
+    } else if (checkEmail.length > 0) {
+      res.status(200).json({
+        status: 200,
+        message: "Email already exists",
+      });
+    } else {
+      const user_1 = await User.create({
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        email: req.body.email,
+        phone_number: req.body.phone_number,
+        roll: req.body.roll,
+      });
+      res.status(200).json({
+        status: 200,
+        message: "User created successfully",
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+exports.viewUsersByAdmin = asyncHandler(async (req, res, next) => {
+  try {
+    const checkEmail = await User.find();
+    const agents = await checkEmail.filter((u) => u.roll == "Agent");
+    const users = await checkEmail.filter((u) => u.roll == "User");
+    res.status(200).json({
+      status: 200,
+      users,
+      agents,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+exports.linkUsersWithSurveyByAdmin = asyncHandler(async (req, res, next) => {
+  try {
+    const { users, topic_id } = req.body;
+    for (let i = 0; i < users.length; i++) {
+      const newLinkedTopic = await LinkedTopics.create({
+        user_id: users[i],
+        topic_id,
+      });
+    }
+    res.status(200).json({
+      status: 200,
+      message: "Linked all users",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+exports.topicAssignedToAgents = asyncHandler(async (req, res, next) => {
+  try {
+    const agent_id = req.user.id;
+    const assignings = await LinkedTopics.find({ user_id: agent_id });
+    if (assignings.length == 0) {
+      res.status(200).json({
+        status: 200,
+        topics,
+      });
+    } else {
+      let topics = [];
+      for (let i = 0; i < assignings.length; i++) {
+        const surveys = await Parent.findById({ _id: assignings[i].topic_id });
+        topics.push({ topcis: surveys });
+      }
+
+      res.status(200).json({
+        status: 200,
+        topics,
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+exports.topicAssignedToUsers = asyncHandler(async (req, res, next) => {
+  try {
+    const topic_id = req.params.id;
+    const assignings = await LinkedTopics.find({ topic_id: topic_id });
+    if (assignings.length == 0) {
+      res.status(200).json({
+        status: 200,
+        topics,
+      });
+    } else {
+      let users = [];
+      for (let i = 0; i < assignings.length; i++) {
+        const surveys = await User.findById({ _id: assignings[i].user_id });
+        if (surveys.roll == "User") {
+          users.push({ users: surveys });
+        }
+      }
+      res.status(200).json({
+        status: 200,
+        users,
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+exports.createUserSurveyRecord = asyncHandler(async (req, res, next) => {
+  try {
+    const { user_id, topic_id } = req.body;
+    const record = await Allsurveys.create({
+      user_id: user_id,
+      topic_id: topic_id,
+    });
+    res.status(200).json({
+      status: 200,
+      message: "Survey Record submitted",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+exports.checkIfSurveySubmitted = asyncHandler(async (req, res, next) => {
+  try {
+    const { user_id, topic_id } = req.body;
+    const record = await Allsurveys.find({
+      user_id: user_id,
+      topic_id: topic_id,
+    });
+    if (record.length > 0) {
+      res.status(200).json({
+        status: 200,
+        message: "Survey already submitted",
+      });
+    } else {
+      res.status(200).json({
+        status: 200,
+        message: "No Survey submitted for this user",
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});

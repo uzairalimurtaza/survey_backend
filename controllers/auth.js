@@ -1,108 +1,96 @@
 const asyncHandler = require("../middleware/async");
 const ErrorResponse = require("../utils/errorResponse");
 const User = require("../models/users_model");
-const Logger = require("../models/Logger")
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
-const sendEmail = require('../utils/sendEmail')
-const fs = require('fs');
+const Logger = require("../models/Logger");
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
+const fs = require("fs");
 const bcrypt = require("bcryptjs");
-const pushNot = require('../middleware/pushNotification')
+const pushNot = require("../middleware/pushNotification");
 
 exports.register = asyncHandler(async (req, res, next) => {
-  var { firstname, lastname, email, password, confirmPassword, phone_number, roll } = req.body;
+  var {
+    firstname,
+    lastname,
+    email,
+    password,
+    confirmPassword,
+    phone_number,
+    roll,
+  } = req.body;
   try {
-    if (phone_number == null || phone_number == '' || phone_number == undefined) {
+    if (
+      phone_number == null ||
+      phone_number == "" ||
+      phone_number == undefined
+    ) {
       return res.status(200).json({
         status: 400,
-        message: 'Please provide your phone_number'
-      });;
-    } else if (firstname == null || firstname == '' || firstname == undefined) {
+        message: "Please provide your phone_number",
+      });
+    } else if (firstname == null || firstname == "" || firstname == undefined) {
       return res.status(200).json({
         status: 400,
-        message: 'Please provide your phone_number'
-      });;
-    } else if (lastname == null || lastname == '' || lastname == undefined) {
+        message: "Please provide your phone_number",
+      });
+    } else if (lastname == null || lastname == "" || lastname == undefined) {
       return res.status(200).json({
         status: 400,
-        message: 'Please provide your phone_number'
-      });;
-    } else if (email == null || email == '' || email == undefined) {
+        message: "Please provide your phone_number",
+      });
+    } else if (email == null || email == "" || email == undefined) {
       return res.status(200).json({
         status: 400,
-        message: 'Please provide your phone_number'
-      });;
-    } else if (password == null || password == '' || password == undefined) {
+        message: "Please provide your phone_number",
+      });
+    } else if (password == null || password == "" || password == undefined) {
       return res.status(200).json({
         status: 400,
-        message: 'Please provide your phone_number'
-      });;
-    } else if (confirmPassword == null || confirmPassword == '' || confirmPassword == undefined) {
+        message: "Please provide your phone_number",
+      });
+    } else if (
+      confirmPassword == null ||
+      confirmPassword == "" ||
+      confirmPassword == undefined
+    ) {
       return res.status(200).json({
         status: 400,
-        message: 'Please provide your phone_number'
+        message: "Please provide your phone_number",
       });
     } else if (!(password === confirmPassword)) {
       res.status(200).json({
         status: 400,
-        message: 'Password not matched'
-      })
+        message: "Password not matched",
+      });
     } else {
       const email_check = await User.find({ email: email });
       const phone_check = await User.find({ phone_number: phone_number });
       if (email_check.length > 0) {
         return res.status(200).json({
           status: 400,
-          message: 'User already registered with this email'
+          message: "User already registered with this email",
         });
-      }
-      else if (phone_check.length > 0) {
+      } else if (phone_check.length > 0) {
         return res.status(200).json({
           status: 400,
-          message: 'User already registered with this phone number'
+          message: "User already registered with this phone number",
         });
       } else {
-        if (roll == null || roll == '' || roll == undefined) {
-
+        if (roll == null || roll == "" || roll == undefined) {
           const user = await User.create({
             firstname,
             lastname,
             email,
             password,
             phone_number,
-            status: 'Approved'
-          });
-          // create transpoter function
-          let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: process.env.EMAIL,
-              pass: process.env.PASSWORD
-            }
-          });
-          // mail options
-          let mailOptions = {
-            from: 'uzaialimurtaza@gmail.com',
-            to: email,
-            subject: 'Masoon Account Credentials',
-            text: `You can login to masoon using email: ${email} and password: ${password}`
-          };
-
-          // send mail
-          transporter.sendMail(mailOptions, (err, data) => {
-            if (err) {
-              console.log('error occured');
-            }
-            else {
-              console.log("mail sent!!!")
-            }
+            status: "Approved",
           });
           res.status(200).json({
             status: 200,
-            message: 'User registered successfully'
+            message: "User registered successfully",
           });
-        }
-        else if (roll === 'Publisher') {
+        } else if (roll === "Publisher") {
           const user = await User.create({
             firstname,
             lastname,
@@ -110,36 +98,11 @@ exports.register = asyncHandler(async (req, res, next) => {
             password,
             roll,
             phone_number,
-            status: 'Pending'
-          });
-          // create transpoter function
-          let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: process.env.EMAIL,
-              pass: process.env.PASSWORD
-            }
-          });
-          // mail options
-          let mailOptions = {
-            from: 'uzaialimurtaza@gmail.com',
-            to: email,
-            subject: 'Masoon Account Credentials',
-            text: `You can login to masoon using email: ${email} and password: ${password}`
-          };
-
-          // send mail
-          transporter.sendMail(mailOptions, (err, data) => {
-            if (err) {
-              console.log('error occured');
-            }
-            else {
-              console.log("mail sent!!!")
-            }
+            status: "Pending",
           });
           res.status(200).json({
             status: 200,
-            message: 'User registered successfully'
+            message: "User registered successfully",
           });
         }
       }
@@ -147,20 +110,6 @@ exports.register = asyncHandler(async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // const email_check = await User.find({ email: email });
   // const phone_check = await User.find({ phone_number: phone_number });
@@ -305,9 +254,7 @@ exports.register = asyncHandler(async (req, res, next) => {
   //           }
   //         });
 
-
   //       }
-
 
   //       res.status(200).json({
   //         status: 200,
@@ -334,14 +281,12 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Please provide an email and password", 400));
   }
 
-
   // Check for user
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
     return next(new ErrorResponse("Invalid credentials", 401));
   }
-
 
   // check if password matches
   const isMatch = await user.matchPassword(password);
@@ -351,16 +296,28 @@ exports.login = asyncHandler(async (req, res, next) => {
   }
   let { device_id } = req.body;
   if (!(device_id == undefined)) {
-    const user_ = await User.findByIdAndUpdate({ _id: user.id }, { device_id: device_id }, { new: true, useFindAndModify: false });
+    const user_ = await User.findByIdAndUpdate(
+      { _id: user.id },
+      { device_id: device_id },
+      { new: true, useFindAndModify: false }
+    );
   }
   let { playerId } = req.body;
   // console.log(req.body)
   if (!(playerId == undefined)) {
     // console.log(user.playerId);
     if (user.playerId == "disabled") {
-      const user_ = await User.findByIdAndUpdate({ _id: user.id }, { playerId: "disabled" }, { new: true, useFindAndModify: false });
+      const user_ = await User.findByIdAndUpdate(
+        { _id: user.id },
+        { playerId: "disabled" },
+        { new: true, useFindAndModify: false }
+      );
     } else if (user.playerId == undefined) {
-      const user_ = await User.findByIdAndUpdate({ _id: user.id }, { playerId: playerId }, { new: true, useFindAndModify: false });
+      const user_ = await User.findByIdAndUpdate(
+        { _id: user.id },
+        { playerId: playerId },
+        { new: true, useFindAndModify: false }
+      );
     }
   }
 
@@ -388,35 +345,37 @@ const sendTokenResponse = async (user, statusCode, res) => {
     user_id: user.id,
     username: user.firstname + " " + user.lastname,
     user_email: user.email,
-    time: current_time
-  })
-
-
-  res.status(statusCode).cookie("token", token, options).json({
-    success: {
-      token: token,
-      type: user.roll,
-      user_name: user.firstname,
-      user_id: user.id,
-      lang: user.language
-    },
-    status: user.status
+    time: current_time,
   });
+
+  res
+    .status(statusCode)
+    .cookie("token", token, options)
+    .json({
+      success: {
+        token: token,
+        type: user.roll,
+        user_name: user.firstname,
+        user_id: user.id,
+        lang: user.language,
+      },
+      status: user.status,
+    });
 };
 exports.getMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
   res.status(200).json({
     success: true,
-    profile: user
-  })
+    profile: user,
+  });
 });
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return next(new ErrorResponse('There is no user with that email', 404));
+    return next(new ErrorResponse("There is no user with that email", 404));
   }
 
   // Get reset token
@@ -426,7 +385,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
   // Create reset url
   const resetUrl = `${req.protocol}://${req.get(
-    'host'
+    "host"
   )}/api/resetpassword/${resetToken}`;
 
   const message = `You are receiving this email because you (or someone else)
@@ -435,17 +394,17 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: 'Password reset token',
-      message
+      subject: "Password reset token",
+      message,
     });
 
-    res.status(200).json({ success: true, data: 'Email sent' });
+    res.status(200).json({ success: true, data: "Email sent" });
   } catch (err) {
     next(err);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save({ validateBeforeSave: false });
-    return next(new ErrorResponse('Email could not be sent', 200));
+    return next(new ErrorResponse("Email could not be sent", 200));
   }
 
   // res.status(200).json({
@@ -457,17 +416,17 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   // Get hashed token
   const resetPasswordToken = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(req.params.resettoken)
-    .digest('hex');
+    .digest("hex");
 
   const user = await User.findOne({
     resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() }
+    resetPasswordExpire: { $gt: Date.now() },
   });
 
   if (!user) {
-    return next(new ErrorResponse('Invalid token', 200));
+    return next(new ErrorResponse("Invalid token", 200));
   }
 
   // Set new password
@@ -480,7 +439,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 });
 
 exports.updatePassword = asyncHandler(async (req, res, next) => {
-
   // try {
   //   var { newPassword, confirmPassword, currentPassword } = req.body
 
@@ -497,17 +455,15 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   //     }
   //   })
 
-
   // } catch (err) {
   //   next(err);
   // }
 
-
   try {
-    const user = await User.findById(req.user.id).select('+password');
+    const user = await User.findById(req.user.id).select("+password");
     // console.log(req.body);
 
-    var { newPassword } = req.body
+    var { newPassword } = req.body;
 
     const result = await user.matchPassword(req.body.currentPassword);
 
@@ -515,26 +471,33 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
     if (result === false) {
       res.status(200).json({
         status: 401,
-        message: 'Incorrect current password'
-      })
-    }
-    else if (result === true) {
+        message: "Incorrect current password",
+      });
+    } else if (result === true) {
       // user.password = req.body.newPassword;
 
       const salt = await bcrypt.genSalt(10);
-      const update_password_of_user = await bcrypt.hash(newPassword, salt, null);
-      const user_update = await User.findByIdAndUpdate({ _id: req.user.id }, { password: update_password_of_user }, { new: true, useFindAndModify: false });
+      const update_password_of_user = await bcrypt.hash(
+        newPassword,
+        salt,
+        null
+      );
+      const user_update = await User.findByIdAndUpdate(
+        { _id: req.user.id },
+        { password: update_password_of_user },
+        { new: true, useFindAndModify: false }
+      );
       res.status(200).json({
         status: 200,
-        message: 'Password updated successfully'
-      })
+        message: "Password updated successfully",
+      });
     }
   } catch (err) {
     next(err);
     res.status(200).json({
       status: 400,
-      message: 'Error while updating password'
-    })
+      message: "Error while updating password",
+    });
   }
 });
 
@@ -545,75 +508,93 @@ exports.getU = asyncHandler(async (req, res, next) => {
     // console.log(req.file);
     if (user.profile_image !== undefined && user.profile_image) {
       // console.log('image exists')
-      const path = user.profile_image
+      const path = user.profile_image;
 
       fs.unlink(path, (err) => {
         if (err) {
-          next(err)
-          return
-        }
-        else {
-          User.findByIdAndUpdate({ _id: user_id }, { profile_image: req.file.path.replace("\\", "/") }, { new: true, useFindAndModify: false }).then((profile) => {
-            profile
-          }).catch((err) => {
-            next(err)
-          })
+          next(err);
+          return;
+        } else {
+          User.findByIdAndUpdate(
+            { _id: user_id },
+            { profile_image: req.file.path.replace("\\", "/") },
+            { new: true, useFindAndModify: false }
+          )
+            .then((profile) => {
+              profile;
+            })
+            .catch((err) => {
+              next(err);
+            });
           res.status(200).json({
             status: 200,
-            message: 'file removed successfully and updated'
-          })
+            message: "file removed successfully and updated",
+          });
         }
-      })
-    }
-    else if (user.profile_image === undefined || user.profile_image === null || user.profile_image) {
+      });
+    } else if (
+      user.profile_image === undefined ||
+      user.profile_image === null ||
+      user.profile_image
+    ) {
       // console.log('image do not exists')
-      const user_ = await User.findByIdAndUpdate({ _id: user_id }, { profile_image: req.file.path.replace("\\", "/") }, { new: true, useFindAndModify: false });
+      const user_ = await User.findByIdAndUpdate(
+        { _id: user_id },
+        { profile_image: req.file.path.replace("\\", "/") },
+        { new: true, useFindAndModify: false }
+      );
       res.status(200).json({
         status: 200,
-        message: 'updated'
-      })
+        message: "updated",
+      });
     }
   } catch (err) {
     next(err);
     res.status(200).json({
       status: 400,
-      message: 'Error while updating image'
-    })
+      message: "Error while updating image",
+    });
   }
 });
 
 exports.editprofile = asyncHandler(async (req, res, next) => {
   try {
-
     const profile = await User.findOne({ _id: req.user.id });
 
-    const update_profile = await User.findByIdAndUpdate({ _id: req.user.id }, req.body, { new: true, useFindAndModify: false });
+    const update_profile = await User.findByIdAndUpdate(
+      { _id: req.user.id },
+      req.body,
+      { new: true, useFindAndModify: false }
+    );
 
     res.status(200).json({
       status: 200,
-      message: "Profile updated successfully"
-    })
-
+      message: "Profile updated successfully",
+    });
   } catch (err) {
     next(err);
   }
-})
+});
 
 exports.updateEmail = asyncHandler(async (req, res, next) => {
   try {
-    let { email } = req.body
+    let { email } = req.body;
     const profile = await User.find({ email: email });
     if (profile.length > 0) {
       res.status(200).json({
         status: 400,
-        message: "Email already taken, please select another different email"
-      })
+        message: "Email already taken, please select another different email",
+      });
     } else {
-      const update_profile = await User.findByIdAndUpdate({ _id: req.user.id }, { email: email }, { new: true, useFindAndModify: false });
+      const update_profile = await User.findByIdAndUpdate(
+        { _id: req.user.id },
+        { email: email },
+        { new: true, useFindAndModify: false }
+      );
       res.status(200).json({
         status: 200,
-        message: "Email updated successfully"
-      })
+        message: "Email updated successfully",
+      });
     }
   } catch (err) {
     next(err);
@@ -622,21 +603,25 @@ exports.updateEmail = asyncHandler(async (req, res, next) => {
 
 exports.updatePhoneNumber = asyncHandler(async (req, res, next) => {
   try {
-    let { phone_number } = req.body
+    let { phone_number } = req.body;
     const profile = await User.find({ phone_number: phone_number });
     if (profile.length > 0) {
       res.status(200).json({
         status: 400,
-        message: "Phone number already exists, please select another different Phone number"
-      })
+        message:
+          "Phone number already exists, please select another different Phone number",
+      });
     } else {
-      const update_profile = await User.findByIdAndUpdate({ _id: req.user.id }, { phone_number: phone_number }, { new: true, useFindAndModify: false });
+      const update_profile = await User.findByIdAndUpdate(
+        { _id: req.user.id },
+        { phone_number: phone_number },
+        { new: true, useFindAndModify: false }
+      );
       res.status(200).json({
         status: 200,
-        message: "Phone Number updated successfully"
-      })
+        message: "Phone Number updated successfully",
+      });
     }
-
   } catch (err) {
     next(err);
   }
@@ -644,18 +629,32 @@ exports.updatePhoneNumber = asyncHandler(async (req, res, next) => {
 
 exports.updateAdvertiser = asyncHandler(async (req, res, next) => {
   try {
-    const user_id = req.params.id
-    const { firstname, lastname, email, phone_number, language } = req.body
+    const user_id = req.params.id;
+    const { firstname, lastname, email, phone_number, language } = req.body;
 
     // console.log(req.body)
 
-    if (firstname == undefined || lastname == undefined || email == undefined || phone_number == undefined || language == undefined
-      || firstname == null || lastname == null || email == null || phone_number == null || language == null
-      || firstname == "" || lastname == "" || email == "" || phone_number == "" || language == "") {
+    if (
+      firstname == undefined ||
+      lastname == undefined ||
+      email == undefined ||
+      phone_number == undefined ||
+      language == undefined ||
+      firstname == null ||
+      lastname == null ||
+      email == null ||
+      phone_number == null ||
+      language == null ||
+      firstname == "" ||
+      lastname == "" ||
+      email == "" ||
+      phone_number == "" ||
+      language == ""
+    ) {
       res.status(200).json({
         status: 400,
-        message: 'Please provide all the required fields'
-      })
+        message: "Please provide all the required fields",
+      });
     } else {
       const findUser = await User.findById({ _id: user_id });
       if (findUser.email == email) {
@@ -663,27 +662,35 @@ exports.updateAdvertiser = asyncHandler(async (req, res, next) => {
           const update_user = await User.findByIdAndUpdate(
             { _id: user_id },
             { firstname: firstname, lastname: lastname, language: language },
-            { new: true, useFindAndModify: false })
+            { new: true, useFindAndModify: false }
+          );
           res.status(200).json({
             status: 200,
-            message: 'Profile Updated'
-          })
+            message: "Profile Updated",
+          });
         } else if (findUser.phone_number != phone_number) {
           const phone_check = await User.find({ phone_number: phone_number });
           if (phone_check.length > 0) {
             res.status(200).json({
               status: 400,
-              message: 'Phone number already exists, please choose different one'
-            })
+              message:
+                "Phone number already exists, please choose different one",
+            });
           } else {
             const update_user = await User.findByIdAndUpdate(
               { _id: user_id },
-              { phone_number: phone_number, firstname: firstname, lastname: lastname, language: language },
-              { new: true, useFindAndModify: false });
+              {
+                phone_number: phone_number,
+                firstname: firstname,
+                lastname: lastname,
+                language: language,
+              },
+              { new: true, useFindAndModify: false }
+            );
             res.status(200).json({
               status: 200,
-              message: 'Profile Updated'
-            })
+              message: "Profile Updated",
+            });
           }
         }
       } else if (findUser.email != email) {
@@ -691,61 +698,82 @@ exports.updateAdvertiser = asyncHandler(async (req, res, next) => {
         if (email_check.length > 0) {
           res.status(200).json({
             status: 400,
-            message: 'Email already exists, please choose different email'
-          })
+            message: "Email already exists, please choose different email",
+          });
         } else {
           if (findUser.phone_number == phone_number) {
             const update_user = await User.findByIdAndUpdate(
               { _id: user_id },
-              { email: email, firstname: firstname, lastname: lastname, language: language },
-              { new: true, useFindAndModify: false })
+              {
+                email: email,
+                firstname: firstname,
+                lastname: lastname,
+                language: language,
+              },
+              { new: true, useFindAndModify: false }
+            );
             res.status(200).json({
               status: 200,
-              message: 'Profile Updated'
-            })
+              message: "Profile Updated",
+            });
           } else if (findUser.phone_number != phone_number) {
             const phone_check = await User.find({ phone_number: phone_number });
             if (phone_check.length > 0) {
               res.status(200).json({
                 status: 400,
-                message: 'Phone number already exists, please choose different one'
-              })
+                message:
+                  "Phone number already exists, please choose different one",
+              });
             } else {
               const update_user = await User.findByIdAndUpdate(
                 { _id: user_id },
-                { email: email, phone_number: phone_number, firstname: firstname, lastname: lastname, language: language },
-                { new: true, useFindAndModify: false });
+                {
+                  email: email,
+                  phone_number: phone_number,
+                  firstname: firstname,
+                  lastname: lastname,
+                  language: language,
+                },
+                { new: true, useFindAndModify: false }
+              );
               res.status(200).json({
                 status: 200,
-                message: 'Profile Updated'
-              })
+                message: "Profile Updated",
+              });
             }
           }
         }
       }
     }
-
   } catch (err) {
     next(err);
     res.status(200).json({
       status: 400,
-      message: 'Error while updating profile'
-    })
+      message: "Error while updating profile",
+    });
   }
-})
+});
 
 exports.updateAdminProfile = asyncHandler(async (req, res, next) => {
   try {
     const user_id = req.params.id;
     const { firstname, lastname, email } = req.body;
 
-    if (firstname == undefined || lastname == undefined || email == undefined
-      || firstname == null || lastname == null || email == null
-      || firstname == "" || lastname == "" || email == "") {
+    if (
+      firstname == undefined ||
+      lastname == undefined ||
+      email == undefined ||
+      firstname == null ||
+      lastname == null ||
+      email == null ||
+      firstname == "" ||
+      lastname == "" ||
+      email == ""
+    ) {
       res.status(200).json({
         status: 400,
-        message: 'Please provide all required fields'
-      })
+        message: "Please provide all required fields",
+      });
     } else {
       const findUser = await User.findById({ _id: user_id });
       if (findUser.email == email) {
@@ -753,28 +781,28 @@ exports.updateAdminProfile = asyncHandler(async (req, res, next) => {
           { _id: user_id },
           { firstname: firstname, lastname: lastname },
           { new: true, useFindAndModify: false }
-        )
+        );
         res.status(200).json({
           status: 200,
-          message: "Profile successfully updated"
-        })
+          message: "Profile successfully updated",
+        });
       } else if (findUser.email != email) {
         const check_email = await User.find({ email: email });
         if (check_email.length > 0) {
           res.status(200).json({
             status: 400,
-            message: 'Email already exists, please select a different one'
-          })
+            message: "Email already exists, please select a different one",
+          });
         } else {
           const updateUser = await User.findByIdAndUpdate(
             { _id: user_id },
             { email: email, firstname: firstname, lastname: lastname },
             { new: true, useFindAndModify: false }
-          )
+          );
           res.status(200).json({
             status: 200,
-            message: "Profile successfully updated"
-          })
+            message: "Profile successfully updated",
+          });
         }
       }
     }
@@ -782,10 +810,49 @@ exports.updateAdminProfile = asyncHandler(async (req, res, next) => {
     next(err);
     res.status(200).json({
       status: 400,
-      message: 'Error while updating profile'
-    })
+      message: "Error while updating profile",
+    });
   }
-})
+});
+
+exports.createUsersInBulk = asyncHandler(async (req, res, next) => {
+  try {
+    const check_mo = await User.find({ phone_number: req.body.phone_number });
+    const check_em = await User.find({ email: req.body.email });
+    if (check_mo.length < 0) {
+      res.status(200).json({
+        status: 400,
+        message: "Mobile number already exists",
+      });
+    } else if (check_em.length > 0) {
+      res.status(200).json({
+        status: 400,
+        message: "Email already exists",
+      });
+    } else {
+      const newUser = await User.create({
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        phone_number: req.body.phone_number,
+        region: req.body.region,
+        teritory: req.body.teritory,
+        area: req.body.area,
+        outletName: req.body.outletName,
+      });
+
+      res.status(200).json({
+        status: 200,
+        message: "User created successfully",
+      });
+    }
+  } catch (err) {
+    next(err);
+    res.status(200).json({
+      status: 400,
+      message: "Error while creating user",
+    });
+  }
+});
 
 exports.emailToLowercase = asyncHandler(async (req, res, next) => {
   try {
@@ -794,14 +861,18 @@ exports.emailToLowercase = asyncHandler(async (req, res, next) => {
       // console.log(user[i].id)
       // if (user[i].email) {
       let email = user[i].email.toLowerCase();
-      const user_ = await User.findByIdAndUpdate({ _id: user[i].id }, { email: email }, { new: true, useFindAndModify: false });
+      const user_ = await User.findByIdAndUpdate(
+        { _id: user[i].id },
+        { email: email },
+        { new: true, useFindAndModify: false }
+      );
       // }
     }
     return res.status(200).json({
       status: 200,
-      message: 'email updated successfully'
-    })
+      message: "email updated successfully",
+    });
   } catch (err) {
     next(err);
   }
-})
+});

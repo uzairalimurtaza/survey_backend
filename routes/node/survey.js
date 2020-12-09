@@ -21,10 +21,27 @@ const {
   setNextQuestionsDefault,
   getallUsers,
   getsingleUser,
+  viewUserSurveys,
+  createAgent,
+  createUserByAdmin,
+  viewUsersByAdmin,
+  linkUsersWithSurveyByAdmin,
+  createUserSurveyRecord,
+  checkIfSurveySubmitted,
+  topicAssignedToAgents,
+  topicAssignedToUsers,
+  viewUserSurveysAssigned
 } = require("../../controllers/node/survey");
 const { protect } = require("../../middleware/auth");
 const router = express.Router();
+router.route("/view/assigned/topics/:id").get(protect, viewUserSurveysAssigned);
 router.route("/topic/questions/:id").get(protect, viewTopicWithQuestions);
+router.route("/assigned/topics").get(protect, topicAssignedToAgents);
+router.route("/assign/topics/:id").get(protect, topicAssignedToUsers);
+router.route("/admin/link/users").put(protect, linkUsersWithSurveyByAdmin);
+router.route("/submit").post(protect, createUserSurveyRecord);
+router.route("/submit").put(protect, checkIfSurveySubmitted);
+router.route("/admin/view/users").get(protect, viewUsersByAdmin);
 router.route("/topic").post(protect, createParentNode);
 router.route("/topic").get(protect, viewParentNode);
 router.route("/child").post(protect, createChildNode);
@@ -44,6 +61,9 @@ router.route("/clicks/:id").get(protect, viewClicks);
 router.route("/link/user").put(protect, linkUserWithSurvey);
 router.route("/users/get/all").get(protect, getallUsers);
 router.route("/single/users/get/:id").get(protect, getsingleUser);
-router.route("/set/next/default/:id").get(protect, setNextQuestionsDefault);
+router.route("/set/next/default/:id").put(protect, setNextQuestionsDefault);
+router.route("/return/survey").post(protect, viewUserSurveys);
+router.route("/agent/create").post(protect, createAgent);
+router.route("/user/create").post(protect, createUserByAdmin);
 
 module.exports = router;
